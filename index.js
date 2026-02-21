@@ -86,7 +86,7 @@ client.on(Events.InteractionCreate, async interaction => {
     if (interaction.commandName !== "regeln") return;
 
     const msg = await interaction.reply({
-        content: "📜 **Server Regeln**\n\n1. Kein Spam\n2. Respektvoll bleiben\n3. Keine Werbung\n\nReagiere mit ✅ um die Regeln zu akzeptieren.",
+        content: "📜 **Server Regeln**\n \n1. Seit Korrekt zueinander \n2. Tut nichts was ich nicht aucht tun würde \n3. Keine Werbung \n4. Mods und Streamer haben immer Recht(nur auf die Regeln bezogen) \n\nReagiere mit ✅ um die Regeln zu akzeptieren.",
         fetchReply: true
     });
 
