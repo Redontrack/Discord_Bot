@@ -1,17 +1,13 @@
 {
-  "name": "code_-discord-bot",
+  "name": "discord-bot",
   "version": "1.0.0",
-  "description": "",
+  "description": "Discord Regeln Bot",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "discord.js": "^14.25.1",
+    "discord.js": "^14.13.1",
     "dotenv": "^17.3.1"
   }
 }
