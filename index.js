@@ -4,9 +4,9 @@ const {
     GatewayIntentBits, 
     Partials, 
     Events, 
-    REST, 
-    Routes, 
-    SlashCommandBuilder 
+    SlashCommandBuilder,
+    REST,
+    Routes
 } = require("discord.js");
 
 const client = new Client({
@@ -36,7 +36,6 @@ const commands = [
 ];
 
 const rest = new REST({ version: "10" }).setToken(TOKEN);
-
 (async () => {
     try {
         console.log("Slash Commands werden registriert...");
@@ -58,20 +57,18 @@ client.once("ready", () => {
 // ===== Neue Mitglieder =====
 client.on(Events.GuildMemberAdd, async member => {
     const guild = member.guild;
-    const everyoneRole = guild.roles.everyone;
 
-    // Rechte für neue User: nur #regeln sehen
-    const regelnChannel = guild.channels.cache.find(c => c.name === "regeln" && c.type === 0); // 0 = Text
+    const regelnChannel = guild.channels.cache.find(c => c.name === "regeln" && c.type === 0); // Text
     if (!regelnChannel) return console.log("Kanal #regeln nicht gefunden!");
 
-    // Setze alle Überschreibungen zurück
+    // Rechte für neue User: nur #regeln sehen
     await regelnChannel.permissionOverwrites.edit(member, {
         VIEW_CHANNEL: true,
         SEND_MESSAGES: false,
         ADD_REACTIONS: true
     });
 
-    // Optional: alle anderen Kanäle unsichtbar
+    // Alle anderen Kanäle unsichtbar
     guild.channels.cache.forEach(async channel => {
         if (channel.id !== regelnChannel.id) {
             await channel.permissionOverwrites.edit(member, {
@@ -106,8 +103,6 @@ client.on(Events.InteractionCreate, async interaction => {
         } catch (err) {
             console.error("Nachricht konnte nicht gepinnt werden:", err);
         }
-    } else {
-        console.log("Nachricht ist bereits gepinnt");
     }
 });
 
@@ -124,8 +119,18 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         const voiceChannel = guild.channels.cache.find(c => c.name === "Stream Wartebereich" && c.type === 2);
 
         if (!role) return console.log("Rolle 'Member' existiert nicht!");
-        await member.roles.add(role);
-        console.log(`${user.tag} hat die Member Rolle bekommen.`);
+
+        // Rolle vergeben, falls nicht vorhanden
+        if (!member.roles.cache.has(role.id)) {
+            await member.roles.add(role);
+            console.log(`${user.tag} hat die Member Rolle bekommen.`);
+        }
+
+        // User verschieben, auch wenn er schon die Rolle hat
+        if (voiceChannel && member.voice.channel) {
+            await member.voice.setChannel(voiceChannel);
+            console.log(`${user.tag} wurde in Stream Wartebereich verschoben.`);
+        }
 
         // Zugriff auf alle Kanäle wieder freigeben
         guild.channels.cache.forEach(async channel => {
@@ -133,27 +138,12 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
                 VIEW_CHANNEL: true
             });
         });
-
-        // Mitglied verschieben, wenn im Voice
-        if (voiceChannel && member.voice.channel) {
-            await member.voice.setChannel(voiceChannel);
-        }
     }
 });
 
+// ✅ Haken entfernen entfernt die Rolle **nicht mehr**
 client.on(Events.MessageReactionRemove, async (reaction, user) => {
-    if (user.bot) return;
-    if (reaction.partial) await reaction.fetch();
-    if (reaction.message.id !== regelnMessageId) return;
-
-    if (reaction.emoji.name === "✅") {
-        const guild = reaction.message.guild;
-        const member = await guild.members.fetch(user.id);
-        const role = guild.roles.cache.find(r => r.name === "Member");
-        if (!role) return;
-        await member.roles.remove(role);
-        console.log(`${user.tag} hat die Member Rolle entfernt.`);
-    }
+    // leer lassen oder eigene Logik hinzufügen, wenn du willst
 });
 
 client.login(TOKEN);
